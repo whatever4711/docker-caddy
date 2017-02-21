@@ -1,13 +1,24 @@
 diff --git caddy/caddymain/run.go caddy/caddymain/run.go
-index ebd6a3b..57346ba 100644
+index 23d9387..60c077f 100644
 --- caddy/caddymain/run.go
 +++ caddy/caddymain/run.go
-@@ -22,6 +22,8 @@ import (
- 
+@@ -12,15 +12,16 @@ import (
+ 	"strings"
+
+ 	"gopkg.in/natefinch/lumberjack.v2"
+-
+ 	"github.com/xenolf/lego/acme"
+-
+ 	"github.com/mholt/caddy"
+ 	// plug in the HTTP server type
+ 	_ "github.com/mholt/caddy/caddyhttp"
+-
  	"github.com/mholt/caddy/caddytls"
  	// This is where other plugins get plugged in (imported)
++
 +	_ "github.com/abiosoft/caddy-git"
++	_ "github.com/nicolasazrak/caddy-cache"
 +	_ "blitznote.com/src/caddy.upload"
  )
- 
+
  func init() {

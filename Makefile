@@ -3,6 +3,10 @@ include builder/CADDY_VERSION
 date=$(shell date +%Y%m%dT%H%M)
 hash=$(shell git rev-parse --short HEAD)
 TAG1=${CADDY_VERSION}-${date}-git-${hash}
+DREPO=test/caddy
+DOCKERFILE_GENERIC="Dockerfile.generic"
+BASE_IMAGE="alpine:3.5"
+ARCH="amd64"
 
 .PHONY: all
 all: runtime
@@ -13,7 +17,7 @@ clean: stop
 	@docker rm -f caddybuild || :
 	@docker rmi -f caddybuild || :
 	@docker rmi -f caddyfile || :
-	@docker rmi -f jumanjiman/caddy || :
+	@docker rmi -f ${DREPO} || :
 
 .PHONY: stop
 stop:
@@ -21,6 +25,7 @@ stop:
 	@docker rm -f caddyfile || :
 
 runtime/caddy:
+	@sed -e "s|<IMAGE>|${BASE_IMAGE}|g" -e "s|<ARCH>|${ARCH}|g" "builder/${DOCKERFILE_GENERIC}" > builder/Dockerfile
 	@docker build -t caddybuild builder/
 	@docker rm -f caddybuild || :
 	@docker run --name caddybuild caddybuild /home/developer/compile.sh
@@ -28,12 +33,9 @@ runtime/caddy:
 
 .PHONY: runtime
 runtime: runtime/caddy
+	@sed -e "s|<IMAGE>|${BASE_IMAGE}|g" -e "s|<ARCH>|${ARCH}|g" "runtime/${DOCKERFILE_GENERIC}" > runtime/Dockerfile
 	@docker build \
-		-t jumanjiman/caddy \
-		--build-arg CI_BUILD_URL=${CIRCLE_BUILD_URL} \
-		--build-arg VCS_REF=${hash} \
-		--build-arg BUILD_DATE=${date} \
-		--build-arg VERSION=${CADDY_VERSION} \
+		-t ${DREPO} \
 		runtime/
 	@docker images | grep caddy
 
@@ -42,30 +44,21 @@ test: stop
 	@touch test/env.bash
 	@docker build --rm -t caddyfile -f fixtures/Dockerfile.config fixtures/
 	@docker create --name caddyfile caddyfile true
-ifdef CIRCLECI
-	@docker run -d \
-		--name caddy \
-		--volumes-from caddyfile \
-		--read-only \
-		-p 80:2020 \
-		jumanjiman/caddy -conf /etc/caddy/caddyfile
-else
 	@docker run -d \
 		--name caddy \
 		--volumes-from caddyfile \
 		--read-only \
 		-p 80:2020 \
 		--cap-drop all \
-		jumanjiman/caddy -conf /etc/caddy/caddyfile
-endif
+		${DREPO} -conf /etc/caddy/caddyfile
 	sleep 5
 	bats test/*.bats
 
 
 .PHONY: push
 push:
-	docker tag jumanjiman/caddy jumanjiman/caddy:${TAG1}
+	docker tag ${DREPO} ${DREPO}:${TAG1}
 	@docker login -e ${mail} -u ${user} -p ${pass}
-	docker push jumanjiman/caddy:${TAG1}
-	docker push jumanjiman/caddy:latest
+	docker push ${DREPO}:${TAG1}
+	docker push ${DREPO}:latest
 	@docker logout
