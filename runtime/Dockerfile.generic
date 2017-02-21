@@ -1,4 +1,5 @@
-FROM alpine:3.5
+FROM <IMAGE>
+ENV ARCH <ARCH>
 
 RUN apk upgrade --no-cache --available && \
     apk add --no-cache \
