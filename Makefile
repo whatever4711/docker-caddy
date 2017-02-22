@@ -2,11 +2,11 @@
 include builder/CADDY_VERSION
 date=$(shell date +%Y%m%dT%H%M)
 hash=$(shell git rev-parse --short HEAD)
-TAG1=${CADDY_VERSION}-${date}-git-${hash}
-DREPO=test/caddy
+DREPO=whatever4711/caddy
 DOCKERFILE_GENERIC="Dockerfile.generic"
 BASE_IMAGE="armhf/alpine:3.5"
-ARCH="armhf"
+ARCH=armhf
+TAG1=${ARCH}-${CADDY_VERSION}-cache
 
 .PHONY: all
 all: runtime
@@ -58,7 +58,7 @@ test: stop
 .PHONY: push
 push:
 	docker tag ${DREPO} ${DREPO}:${TAG1}
-	@docker login -e ${mail} -u ${user} -p ${pass}
+	#@docker login -u ${user} -p ${pass}
 	docker push ${DREPO}:${TAG1}
-	docker push ${DREPO}:latest
-	@docker logout
+	#docker push ${DREPO}:latest
+	#@docker logout
