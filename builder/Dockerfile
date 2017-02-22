@@ -1,9 +1,9 @@
-FROM alpine:3.5
+FROM armhf/alpine:3.5
 
 ENV GOPATH /home/developer
 ENV CGO_ENABLED 0
 ENV GOOS linux
-ENV ARCH amd64
+ENV ARCH armhf
 
 RUN apk upgrade --no-cache --available && \
     apk add --no-cache \

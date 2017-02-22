@@ -1,4 +1,5 @@
-FROM alpine:3.5
+FROM armhf/alpine:3.5
+ENV ARCH armhf
 
 RUN apk upgrade --no-cache --available && \
     apk add --no-cache \
@@ -6,15 +7,16 @@ RUN apk upgrade --no-cache --available && \
       tini \
       git \
       libressl \
-    && adduser -Du 1000 caddy
-
-RUN echo "hello world" > /home/caddy/index.html
+      libcap \
+    && adduser -Du 1000 caddy \
+    && mkdir -p /home/caddy/logs \
+    && chown -R caddy:caddy /home/caddy
 
 VOLUME ["/etc/caddy"]
 VOLUME ["/home/caddy"]
 
 COPY caddy /usr/sbin/caddy
-
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
 # Run as an unprivileged user.
 USER caddy
 ENTRYPOINT ["/sbin/tini", "--", "/usr/sbin/caddy"]

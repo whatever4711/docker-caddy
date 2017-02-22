@@ -5,8 +5,8 @@ hash=$(shell git rev-parse --short HEAD)
 TAG1=${CADDY_VERSION}-${date}-git-${hash}
 DREPO=test/caddy
 DOCKERFILE_GENERIC="Dockerfile.generic"
-BASE_IMAGE="alpine:3.5"
-ARCH="amd64"
+BASE_IMAGE="armhf/alpine:3.5"
+ARCH="armhf"
 
 .PHONY: all
 all: runtime
